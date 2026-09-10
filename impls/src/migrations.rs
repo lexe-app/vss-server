@@ -2,10 +2,6 @@ pub(crate) const DB_VERSION_COLUMN: &str = "db_version";
 #[cfg(test)]
 pub(crate) const MIGRATION_LOG_COLUMN: &str = "upgrade_from";
 
-pub(crate) const CHECK_DB_STMT: &str = "SELECT 1 FROM pg_database WHERE datname = $1";
-pub(crate) const INIT_DB_CMD: &str = "CREATE DATABASE";
-#[cfg(test)]
-pub(crate) const DROP_DB_CMD: &str = "DROP DATABASE";
 pub(crate) const GET_VERSION_STMT: &str = "SELECT db_version FROM vss_db_version;";
 pub(crate) const UPDATE_VERSION_STMT: &str = "UPDATE vss_db_version SET db_version=$1;";
 pub(crate) const LOG_MIGRATION_STMT: &str = "INSERT INTO vss_db_upgrades VALUES($1);";
