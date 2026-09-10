@@ -135,7 +135,6 @@ fn main() {
 			Some(crt_pem) => {
 				let postgres_tls_backend = PostgresTlsBackend::new(
 					&config.postgresql,
-					&config.default_db,
 					crt_pem.as_deref(),
 				)
 				.await
@@ -154,7 +153,6 @@ fn main() {
 			None => {
 				let postgres_plaintext_backend = PostgresPlaintextBackend::new(
 					&config.postgresql,
-					&config.default_db,
 				)
 				.await
 				.unwrap_or_else(|e| {
