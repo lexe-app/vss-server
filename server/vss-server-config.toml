@@ -22,8 +22,6 @@ bind_address = "127.0.0.1:8080" # Optional in TOML, can be overridden by env var
 username = "postgres"          # Optional in TOML, can be overridden by env var `VSS_PSQL_USERNAME`
 password = "postgres"          # Optional in TOML, can be overridden by env var `VSS_PSQL_PASSWORD`
 address = "127.0.0.1:5432"     # Optional in TOML, can be overridden by env var `VSS_PSQL_ADDRESS`
-# We first connect to `default_database` to create `vss_database` if it does not exist
-default_database = "postgres"  # Optional in TOML, can be overridden by env var `VSS_PSQL_DEFAULT_DB`
 vss_database = "vss"           # Optional in TOML, can be overridden by env var `VSS_PSQL_VSS_DB`
 
 # [postgresql_config.tls]  # Uncomment, or set env var `VSS_PSQL_TLS` to make TLS connections to the postgres database

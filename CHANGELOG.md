@@ -1,3 +1,8 @@
+# Unreleased
+
+- Connect directly to an existing PostgreSQL application database. Operators must provision it before
+  starting VSS; `default_database` and `VSS_PSQL_DEFAULT_DB` are no longer used.
+
 # 0.1.0-alpha.0 - Jun. 11, 2026
 
 - VSS service implementing VSS protocol version 0. (#34, #35)

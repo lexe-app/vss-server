@@ -19,9 +19,9 @@ cargo build --release
 cargo run -- server/vss-server-config.toml
 ```
 
-The sample config connects to `postgres:postgres@127.0.0.1:5432`, creates the `vss` database if it
-does not exist, and runs schema migrations on startup. The VSS endpoint is
-`http://localhost:8080/vss`; `/metrics` is available without VSS authentication:
+The sample config connects to `postgres:postgres@127.0.0.1:5432` and runs schema migrations on
+startup. The VSS endpoint is `http://localhost:8080/vss`; `/metrics` is available without VSS
+authentication:
 
 ```bash
 curl -f http://localhost:8080/metrics
@@ -40,17 +40,12 @@ docker compose up --build
 
 ## PostgreSQL Setup
 
-VSS first connects to `default_database`, then creates `vss_database` if it is missing, then connects
-to `vss_database` and applies migrations. With the sample config these are `postgres` and `vss`.
+VSS connects to `vss_database` and applies migrations. With the sample config this is the `vss` db.
 
-The configured PostgreSQL role must be able to connect to `default_database`. It must also either:
+The configured PostgreSQL role must be able to connect to an existing `vss_database` and have
+privileges to create/alter tables, indexes, sequences, and rows in that database.
 
-- have permission to run `CREATE DATABASE vss` when `vss_database` does not exist, or
-- use an already-created `vss_database` and have privileges to create/alter tables, indexes,
-  sequences, and rows in that database.
-
-For an existing local PostgreSQL instance, create the database yourself if the VSS user cannot create
-databases:
+For an existing local PostgreSQL instance, provision the database before starting VSS:
 
 ```bash
 createdb -U postgres vss
@@ -63,7 +58,6 @@ environment variables:
 VSS_PSQL_USERNAME=postgres
 VSS_PSQL_PASSWORD=postgres
 VSS_PSQL_ADDRESS=127.0.0.1:5432
-VSS_PSQL_DEFAULT_DB=postgres
 VSS_PSQL_VSS_DB=vss
 ```
 
@@ -122,7 +116,6 @@ environment variable.
 | `postgresql_config.username` | `VSS_PSQL_USERNAME` | PostgreSQL user. |
 | `postgresql_config.password` | `VSS_PSQL_PASSWORD` | PostgreSQL password. |
 | `postgresql_config.address` | `VSS_PSQL_ADDRESS` | PostgreSQL host and port. |
-| `postgresql_config.default_database` | `VSS_PSQL_DEFAULT_DB` | Database used for startup and database creation. |
 | `postgresql_config.vss_database` | `VSS_PSQL_VSS_DB` | VSS application database. |
 | `postgresql_config.tls` | `VSS_PSQL_TLS` | Enables PostgreSQL TLS with system trust roots. |
 | `postgresql_config.tls.crt_pem` | `VSS_PSQL_CRT_PEM` | Adds a PEM root certificate and enables PostgreSQL TLS. |
