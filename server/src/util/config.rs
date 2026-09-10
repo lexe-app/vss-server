@@ -66,7 +66,7 @@ pub(crate) struct Configuration {
 	pub(crate) max_request_body_size: Option<usize>,
 	#[cfg(feature = "jwt")]
 	pub(crate) rsa_pem: Option<String>,
-	pub(crate) postgresql_prefix: String,
+	pub(crate) postgresql: tokio_postgres::Config,
 	pub(crate) default_db: String,
 	pub(crate) vss_db: String,
 	pub(crate) tls_config: Option<Option<String>>,
@@ -211,7 +211,9 @@ pub(crate) fn load_configuration(config_file_path: Option<&str>) -> Result<Confi
 	let tls_config =
 		crt_pem_env.map(|pem| Some(pem)).or(tls_config_env.map(|_| None)).or(tls_config);
 
-	let postgresql_prefix = format!("postgresql://{}:{}@{}", username, password, address);
+	let postgresql = format!("postgresql://{}:{}@{}/{}", username, password, address, vss_db)
+		.parse()
+		.map_err(|e| format!("Failed to parse PostgreSQL configuration: {}", e))?;
 
 	Ok(Configuration {
 		bind_address,
@@ -220,7 +222,7 @@ pub(crate) fn load_configuration(config_file_path: Option<&str>) -> Result<Confi
 		log_level,
 		#[cfg(feature = "jwt")]
 		rsa_pem,
-		postgresql_prefix,
+		postgresql,
 		default_db,
 		vss_db,
 		tls_config,

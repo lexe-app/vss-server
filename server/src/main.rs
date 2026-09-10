@@ -134,9 +134,8 @@ fn main() {
 			#[cfg(feature = "postgres-native-tls")]
 			Some(crt_pem) => {
 				let postgres_tls_backend = PostgresTlsBackend::new(
-					&config.postgresql_prefix,
+					&config.postgresql,
 					&config.default_db,
-					&config.vss_db,
 					crt_pem.as_deref(),
 				)
 				.await
@@ -154,9 +153,8 @@ fn main() {
 			},
 			None => {
 				let postgres_plaintext_backend = PostgresPlaintextBackend::new(
-					&config.postgresql_prefix,
+					&config.postgresql,
 					&config.default_db,
-					&config.vss_db,
 				)
 				.await
 				.unwrap_or_else(|e| {

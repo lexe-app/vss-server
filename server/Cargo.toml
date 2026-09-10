@@ -24,6 +24,7 @@ hyper = { version = "1", default-features = false, features = ["server", "http1"
 http-body-util = { version = "0.1", default-features = false }
 hyper-util = { version = "0.1", default-features = false, features = ["tokio"] }
 tokio = { version = "1.30", default-features = false, features = ["time", "signal", "rt-multi-thread", "macros"] }
+tokio-postgres = "0.7.15"
 prost = { version = "0.11", default-features = false, features = ["std"] }
 bytes = "1"
 serde = { version = "1.0.184", default-features = false, features = ["derive"] }
