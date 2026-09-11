@@ -27,7 +27,7 @@ const PROTOCOL_VERSION_HEADER: &str = "vss-protocol-version";
 const PROTOCOL_VERSION: &str = "0";
 
 #[derive(Clone, Copy)]
-pub(crate) struct VssServiceConfig {
+pub struct VssServiceConfig {
 	maximum_request_body_size: usize,
 }
 
@@ -58,14 +58,14 @@ pub struct VssService {
 }
 
 impl VssService {
-	pub(crate) fn new(
+	pub fn new(
 		store: Arc<dyn KvStore>, authorizer: Arc<dyn Authorizer>, config: VssServiceConfig,
 	) -> Self {
 		Self { store, authorizer, config }
 	}
 }
 
-pub(crate) const BASE_PATH_PREFIX: &str = "/vss";
+pub const BASE_PATH_PREFIX: &str = "/vss";
 
 impl Service<Request<Incoming>> for VssService {
 	type Response = Response<Full<Bytes>>;
