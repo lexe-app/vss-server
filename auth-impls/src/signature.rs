@@ -12,7 +12,7 @@
 use api::auth::{AuthResponse, Authorizer};
 use api::error::VssError;
 use async_trait::async_trait;
-use bitcoin_hashes::HashEngine;
+use bitcoin_hashes::Hash;
 use std::collections::HashMap;
 use std::time::SystemTime;
 
@@ -70,17 +70,18 @@ impl Authorizer for SignatureValidatingAuthorizer {
 			return Err(VssError::AuthError("Time is too far from now".to_string()))?;
 		}
 
-		let pubkey = secp256k1::PublicKey::from_byte_array_compressed(pubkey_bytes)
+		let pubkey = secp256k1::PublicKey::from_slice(pubkey_bytes.as_slice())
 			.map_err(|_| VssError::AuthError("Authorization header has bad pubkey".to_string()))?;
 		let sig = secp256k1::ecdsa::Signature::from_compact(&sig_bytes)
 			.map_err(|_| VssError::AuthError("Authorization header has bad sig".to_string()))?;
 
-		let mut hash = bitcoin_hashes::Sha256::engine();
-		hash.input(&SIGNING_CONSTANT);
-		hash.input(&pubkey_bytes);
-		hash.input(time_strng.as_bytes());
-		let signed_hash = secp256k1::Message::from_digest(hash.finalize().to_byte_array());
-		sig.verify(signed_hash, &pubkey)
+		let hash = bitcoin_hashes::sha256::Hash::hash_byte_chunks(&[
+			SIGNING_CONSTANT,
+			pubkey_bytes.as_slice(),
+			time_strng.as_bytes(),
+		]);
+		let signed_hash = secp256k1::Message::from_digest(hash.to_byte_array());
+		sig.verify(&signed_hash, &pubkey)
 			.map_err(|_| VssError::AuthError("Signature was invalid".to_string()))?;
 
 		Ok(AuthResponse { user_token: pubkey_hex.to_owned() })
@@ -92,20 +93,21 @@ mod tests {
 	use crate::signature::{SignatureValidatingAuthorizer, SIGNING_CONSTANT};
 	use api::auth::Authorizer;
 	use api::error::VssError;
+	use bitcoin_hashes::Hash;
 	use secp256k1::{Message, PublicKey, SecretKey};
 	use std::collections::HashMap;
 	use std::fmt::Write;
 	use std::time::SystemTime;
 
 	fn build_token(now: u64) -> (String, PublicKey) {
-		let secret_key = SecretKey::from_byte_array([42; 32]).unwrap();
+		let secret_key = SecretKey::from_slice(&[42; 32]).unwrap();
 		let pubkey = secret_key.public_key(secp256k1::SECP256K1);
 
 		let mut bytes_to_sign = Vec::new();
 		bytes_to_sign.extend_from_slice(SIGNING_CONSTANT);
 		bytes_to_sign.extend_from_slice(&pubkey.serialize());
 		bytes_to_sign.extend_from_slice(format!("{now}").as_bytes());
-		let hash = bitcoin_hashes::Sha256::hash(&bytes_to_sign);
+		let hash = bitcoin_hashes::sha256::Hash::hash(&bytes_to_sign);
 		let sig = secret_key.sign_ecdsa(Message::from_digest(hash.to_byte_array()));
 		let mut sig_hex = String::with_capacity(64 * 2);
 		for c in sig.serialize_compact() {
