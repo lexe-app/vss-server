@@ -1,3 +1,8 @@
+// NOTE(phlip9): avoid pub(crate) rebase hell by making both
+// `server/src/main.rs` and `server/src/lib.rs` (new) declare `mod util;` and
+// just ignoring any dead code.
+#![allow(dead_code)]
+
 pub(crate) mod config;
 pub(crate) mod logger;
 
