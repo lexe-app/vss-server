@@ -145,59 +145,49 @@ impl Service<Request<Incoming>> for VssService {
 async fn handle_get_object_request(
 	store: Arc<dyn KvStore>, user_token: String, request: GetObjectRequest,
 ) -> Result<GetObjectResponse, VssError> {
-	let request_id: u64 = rand::random();
-	trace!("Handling GetObjectRequest {} for key {}.", request_id, request.key);
+	trace!("Handling GetObjectRequest for key {}", request.key);
 	let result = store.get(user_token, request).await;
 	if let Err(ref e) = result {
-		debug!("GetObjectRequest {} failed: {}", request_id, e);
+		debug!("GetObjectRequest failed: {e}");
 	}
 	result
 }
 async fn handle_put_object_request(
 	store: Arc<dyn KvStore>, user_token: String, request: PutObjectRequest,
 ) -> Result<PutObjectResponse, VssError> {
-	let request_id: u64 = rand::random();
 	trace!(
-		"Handling PutObjectRequest {} for transaction_items {} and delete_items {}.",
-		request_id,
+		"Handling PutObjectRequest for transaction_items {} and delete_items {}",
 		KeyValueVecKeyPrinter(&request.transaction_items),
 		KeyValueVecKeyPrinter(&request.delete_items),
 	);
 	let result = store.put(user_token, request).await;
 	if let Err(ref e) = result {
-		debug!("PutObjectRequest {} failed: {}", request_id, e);
+		debug!("PutObjectRequest failed: {e}");
 	}
 	result
 }
 async fn handle_delete_object_request(
 	store: Arc<dyn KvStore>, user_token: String, request: DeleteObjectRequest,
 ) -> Result<DeleteObjectResponse, VssError> {
-	let request_id: u64 = rand::random();
-	trace!(
-		"Handling DeleteObjectRequest {} for key {:?}",
-		request_id,
-		request.key_value.as_ref().map(|t| &t.key)
-	);
+	trace!("Handling DeleteObjectRequest for key {:?}", request.key_value.as_ref().map(|t| &t.key));
 	let result = store.delete(user_token, request).await;
 	if let Err(ref e) = result {
-		trace!("DeleteObjectRequest {} failed: {}", request_id, e);
+		trace!("DeleteObjectRequest failed: {e}");
 	}
 	result
 }
 async fn handle_list_object_request(
 	store: Arc<dyn KvStore>, user_token: String, request: ListKeyVersionsRequest,
 ) -> Result<ListKeyVersionsResponse, VssError> {
-	let request_id: u64 = rand::random();
 	trace!(
-		"Handling ListKeyVersionsRequest {} for key_prefix {:?}, page_size {:?}, page_token {:?}",
-		request_id,
+		"Handling ListKeyVersionsRequest for key_prefix {:?}, page_size {:?}, page_token {:?}",
 		request.key_prefix,
 		request.page_size,
 		request.page_token
 	);
 	let result = store.list_key_versions(user_token, request).await;
 	if let Err(ref e) = result {
-		debug!("ListKeyVersionsRequest {} failed: {}", request_id, e);
+		debug!("ListKeyVersionsRequest failed: {e}");
 	}
 	result
 }
