@@ -1,8 +1,9 @@
 use http_body_util::{BodyExt, Full, Limited};
-use hyper::body::{Bytes, Incoming};
+use hyper::body::{Body, Bytes};
 use hyper::service::Service;
 use hyper::{Request, Response, StatusCode};
 use std::collections::HashMap;
+use std::convert::Infallible;
 
 use prost::Message;
 
@@ -67,12 +68,16 @@ impl VssService {
 
 pub const BASE_PATH_PREFIX: &str = "/vss";
 
-impl Service<Request<Incoming>> for VssService {
+impl<B> Service<Request<B>> for VssService
+where
+	B: Body<Data = Bytes> + Send + 'static,
+	B::Error: Into<Box<dyn std::error::Error + Send + Sync>>,
+{
 	type Response = Response<Full<Bytes>>;
-	type Error = hyper::Error;
+	type Error = Infallible;
 	type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;
 
-	fn call(&self, req: Request<Incoming>) -> Self::Future {
+	fn call(&self, req: Request<B>) -> Self::Future {
 		let store = Arc::clone(&self.store);
 		let authorizer = Arc::clone(&self.authorizer);
 		let path = req.uri().path().to_owned();
@@ -192,14 +197,18 @@ async fn handle_list_object_request(
 	result
 }
 async fn handle_request<
+	B: Body<Data = Bytes> + Send + 'static,
 	T: Message + Default,
 	R: Message,
 	F: FnOnce(Arc<dyn KvStore>, String, T) -> Fut + Send + 'static,
 	Fut: Future<Output = Result<R, VssError>> + Send,
 >(
-	store: Arc<dyn KvStore>, authorizer: Arc<dyn Authorizer>, request: Request<Incoming>,
+	store: Arc<dyn KvStore>, authorizer: Arc<dyn Authorizer>, request: Request<B>,
 	maximum_request_body_size: usize, handler: F,
-) -> Result<<VssService as Service<Request<Incoming>>>::Response, hyper::Error> {
+) -> Result<Response<Full<Bytes>>, Infallible>
+where
+	B::Error: Into<Box<dyn std::error::Error + Send + Sync>>,
+{
 	let (parts, body) = request.into_parts();
 	let headers_map = parts
 		.headers
