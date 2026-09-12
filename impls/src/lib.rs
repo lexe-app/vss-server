@@ -14,7 +14,8 @@
 #![deny(missing_docs)]
 
 mod const_utils;
-mod migrations;
+/// Contains PostgreSQL migrations.
+pub mod migrations;
 /// Contains [PostgreSQL](https://www.postgresql.org/) based backend implementation for VSS.
 pub mod postgres_store;
 
