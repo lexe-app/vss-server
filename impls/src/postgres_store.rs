@@ -289,9 +289,14 @@ where
 	T::TlsConnect: Send,
 	<<T as MakeTlsConnect<Socket>>::TlsConnect as TlsConnect<Socket>>::Future: Send,
 {
-	async fn new_internal(config: &Config, tls: T) -> Result<Self, Error> {
+	/// Connect to an existing database whose schema is managed by the caller.
+	pub async fn connect(config: &Config, tls: T) -> Result<Self, Error> {
 		let pool = SmallPool::new(config, tls).await?;
-		let postgres_backend = PostgresBackend { pool };
+		Ok(Self { pool })
+	}
+
+	async fn new_internal(config: &Config, tls: T) -> Result<Self, Error> {
+		let postgres_backend = Self::connect(config, tls).await?;
 
 		#[cfg(not(test))]
 		postgres_backend.migrate_vss_database(MIGRATIONS).await?;

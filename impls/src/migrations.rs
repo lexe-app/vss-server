@@ -14,7 +14,8 @@ pub(crate) const GET_MIGRATION_LOG_STMT: &str = "SELECT upgrade_from FROM vss_db
 //
 // We make an exception for the vss_db table creation statement, as users of VSS could have initialized the table
 // themselves.
-pub(crate) const MIGRATIONS: &[&str] = &[
+/// List of PostgreSQL migrations.
+pub const MIGRATIONS: &[&str] = &[
 	"CREATE TABLE vss_db_version (db_version INTEGER);",
 	"INSERT INTO vss_db_version VALUES(1);",
 	// A write-only log of all the migrations performed on this database, useful for debugging and testing
